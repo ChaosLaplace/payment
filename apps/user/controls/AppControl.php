@@ -13,11 +13,6 @@ class AppControl extends Control {
     }
 
     public function test() {
-        //$key = 'S' . rand(10000, 99999);
-        $id = rand(100, 999);
-        $route = 'auction:startPreview:' . $id;
-        // 类:方法:参数1
-        redis_event_add($route, 3);
         echo 'set 11111111111';
     }
 

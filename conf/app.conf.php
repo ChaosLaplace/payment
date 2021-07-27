@@ -20,9 +20,9 @@ $GLOBALS['app']['version'] = '0.1';
 $GLOBALS['app']['env'] = 'development';
 
 // 资源域名
-$GLOBALS['app']['rs_domain']    = 'http://rs.natasa.com/';
+$GLOBALS['app']['rs_domain']    = 'http://rs.payment.com/';
 // 图片域名
-$GLOBALS['app']['img_domain']   = 'http://img.natasa.com/';
+$GLOBALS['app']['img_domain']   = 'http://img.payment.com/';
 
 // 数据密钥
 $GLOBALS['app']['secret'] = '123456';
@@ -40,21 +40,6 @@ $GLOBALS['app']['receipt_confirm_time'] = 14 * 24 * 60 * 60;
 // 用户默认头像
 $GLOBALS['app']['default_avatar'] = 'http://yyptp.oss-accelerate.aliyuncs.com/2021/0713/80c33f816f959a1be479a0df104089d6.jpg';
 
-$GLOBALS['app']['room_subscript'] = [
-    ['id'=>'NEW', 'name_zh'=>'新手', 'name_en'=>'new', 'name_local'=>'new'],
-    ['id'=>'ACE', 'name_zh'=>'高手', 'name_en'=>'ace', 'name_local'=>'ace'],
-];
-
-// 收款银行卡，后期如果有需要则改到数据库中
-$GLOBALS['app']['rec_bank'] = [
-    'id'            => 1,
-    'bank_id'       => 1,
-    'bank_name'     => '建设银行',
-    'contract_bank' => '北京海淀支行',
-    'account_num'   => '6217200625694568256',
-    'username'      => '张三',
-];
-
 // 提现最低限额，分
 $GLOBALS['app']['exchange_limit'] = 100;
 
@@ -65,8 +50,8 @@ $GLOBALS['request']['locale'] = 'vi';
 $GLOBALS['request']['lang'] = 'zh';
 
 // 设置session信息
-$GLOBALS['session']['name']     = 'natasa';
-$GLOBALS['session']['domain']   = 'natasa.com';
+$GLOBALS['session']['name']     = 'payment';
+$GLOBALS['session']['domain']   = 'payment.com';
 $GLOBALS['session']['expire']   = 3600;
 
 // token过期时间
@@ -94,6 +79,6 @@ $GLOBALS['db']['default']['driver']     = 'mysql';
 $GLOBALS['db']['default']['hostname']   = 'localhost';
 $GLOBALS['db']['default']['username']   = 'root';
 $GLOBALS['db']['default']['password']   = 'root';
-$GLOBALS['db']['default']['database']   = 'natasa';
+$GLOBALS['db']['default']['database']   = 'payment';
 $GLOBALS['db']['default']['port']       = '3306';
 $GLOBALS['db']['default']['charset']    = 'utf8bm4';

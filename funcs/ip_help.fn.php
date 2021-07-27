@@ -42,8 +42,3 @@ function ip_area($ip) {
 
     return $ip_info['country'];
 }
-
-function ip_long_get() {
-    $ip = ip_get();
-    return ip2long($ip);
-}
