@@ -2,6 +2,8 @@
 
 $urls = array(
     'test'                       => array('c'=>'Test', 'f'=>'test'),
+    
+    'bot'                        => array('c'=>'Bot'),
 
     'user'                       => array('c'=>'User'),
     'user/login'                 => array('c'=>'User', 'f'=>'login'),

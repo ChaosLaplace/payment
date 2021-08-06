@@ -20,6 +20,10 @@ $GLOBALS['app']['version'] = '0.1';
 $GLOBALS['app']['env'] = 'development';
 
 // 资源域名
+$GLOBALS['bot']['token'] = '1632116104:AAGJ6ctNYHBrYjp2YzKNYYpan4Tm3fg-fHs';
+$GLOBALS['bot']['url']   = 'http://8.210.136.49:8081/bot' . $GLOBALS['bot']['token'] . '/';
+
+// 资源域名
 $GLOBALS['app']['rs_domain']    = 'http://rs.payment.com/';
 // 图片域名
 $GLOBALS['app']['img_domain']   = 'http://img.payment.com/';
@@ -50,8 +54,8 @@ $GLOBALS['request']['locale'] = 'vi';
 $GLOBALS['request']['lang'] = 'zh';
 
 // 设置session信息
-$GLOBALS['session']['name']     = 'payment';
-$GLOBALS['session']['domain']   = 'payment.com';
+$GLOBALS['session']['name']     = 'boqingbot';
+$GLOBALS['session']['domain']   = 'boqingbot.online';
 $GLOBALS['session']['expire']   = 3600;
 
 // token过期时间
@@ -77,8 +81,8 @@ $GLOBALS['redis']['event']['db']   = '1';
 // 默认数据库配置
 $GLOBALS['db']['default']['driver']     = 'mysql';
 $GLOBALS['db']['default']['hostname']   = 'localhost';
-$GLOBALS['db']['default']['username']   = 'root';
-$GLOBALS['db']['default']['password']   = 'root';
-$GLOBALS['db']['default']['database']   = 'payment';
+$GLOBALS['db']['default']['username']   = 'zxbot';
+$GLOBALS['db']['default']['password']   = 'Z58ks8X43dyZDRtY';
+$GLOBALS['db']['default']['database']   = 'zxbot';
 $GLOBALS['db']['default']['port']       = '3306';
 $GLOBALS['db']['default']['charset']    = 'utf8bm4';

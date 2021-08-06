@@ -13,8 +13,12 @@
  */
 
 return array(
-    '.*' => array(
-        'weld'  => 'pre_control',
-        'fn'    => 'access_hook'
-    )
+    'bot' => array(
+        'weld'  => 'post_control',
+        'fn'    => 'boot_hook'
+    ),
+    // '.*' => array(
+    //     'weld'  => 'pre_control',
+    //     'fn'    => 'access_hook'
+    // )
 );
