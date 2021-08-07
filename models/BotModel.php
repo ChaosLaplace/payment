@@ -12,7 +12,53 @@ class BotModel {
     /** 驗證機器人接收訊息的群組 */
     const BOT_GROUP = -595842164;
     /** 分割字串 */
-    const EXPLODE   = '~!@';
+    const EXPLODE   = '||';
+
+    const LOG_PATH_INFO  = ROOT . 'logs/bot/info_log.txt';
+    const LOG_PATH_ERROR = ROOT . 'logs/bot/error_log.txt';
+
+    /**
+     * 查詢管理員是否存在
+     */
+    public static function getBotAdminById($tg_id) {
+        $sql = "select id from bot_admin where tg_id=?s";
+        return DB::getVar($sql, [$tg_id]);
+    }
+
+    /**
+     * 查詢群組是否存在
+     */
+    public static function getBotGroupByGroupId($tg_group_id) {
+        $sql = "select id from bot_group where tg_group_id=?s";
+        return DB::getVar($sql, [$tg_group_id]);
+    }
+    
+    /**
+     * 判斷命令
+     */
+    public static function getCommand($data) {
+        return explode(self::EXPLODE, $data);
+    }
+
+    /**
+     * 添加管理員
+     */
+    public static function addAdmin($bot_admin, $tg_id) {
+        if ( !$bot_admin ) {
+            $data = array(
+                'tg_id' => $tg_id
+            );
+            DB::insert('bot_admin', $data);
+        }
+    }
+
+    /**
+     * 查詢發送訊息的群組
+     */
+    public static function listGroupId() {
+        $sql = "select tg_group_id from bot_group";
+        return DB::runSql($sql);
+    }
 
     /**
      * 判斷機器人 入群新增 || 退群刪除
@@ -24,10 +70,9 @@ class BotModel {
             if ( self::BOT_ID !== $data['message']['new_chat_member']['id'] ) {
                 return false;
             }
-
-            // 判斷是管理員操作
-            if ( self::getBotAdminById($data['message']['from']['id']) ) {
-
+            
+            // 查詢群組是否存在 不存在則新增
+            if ( !self::getBotGroupByGroupId($data['message']['chat']['id']) ) {
                 $data = array(
                     'tg_group_id' => $data['message']['chat']['id']
                 );
@@ -42,78 +87,64 @@ class BotModel {
                 return false;
             }
             
-            // 判斷是管理員操作
-            if ( self::getBotAdminById($data['message']['from']['id']) ) {
+            // 查詢群組是否存在 存在則刪除
+            if ( $tg_group_id = self::getBotGroupByGroupId($data['message']['chat']['id']) ) {
+                $sql = "delete from bot_group where id=?i";
+                DB::runSql($sql, [$tg_group_id]);
+            }
+        }
+    }
 
-                $sql = "delete from bot_group where tg_group_id=?s limit 1";
-                DB::runSql($sql, [$data['message']['chat']['id']]);
+    /**
+     * 群发圖文
+     */
+    public static function sendMessage($msg, $photo_id) {
+        if ( $photo_id === false ) {
+            $url          = $GLOBALS['bot']['url'] . 'sendMessage';
+            $send['text'] = $msg;
+        }
+        else {
+            $url             = $GLOBALS['bot']['url'] . 'sendPhoto';
+            $send['caption'] = $msg;
+            $send['photo']   = $photo_id;
+        }
+
+        $group_list  = self::listGroupId(); 
+
+        $count       = 1;
+        $return_data = '';
+        $decode_data = '';
+        $error_log   = '';
+        foreach ($group_list as $group) {
+            $send['chat_id'] = $group['tg_group_id'];
+            $return_data     = self::__curlJson($url, $send);
+            $decode_data     = json_decode($return_data['data'], true);
+
+            if( !$decode_data['ok'] ) {
+                $decode_data['date'] = date('Y-m-d H:i:s');
+                $error_log           = json_encode($decode_data, true) . PHP_EOL . PHP_EOL;
+                file_put_contents(self::LOG_PATH_ERROR, $error_log, FILE_APPEND);
+            }
+
+            if ( $count % 10 === 0 ) {
+                usleep(20000);
             }
         }
     }
     
-
-    /**
-     * 判斷命令
-     */
-    public static function getCommand($data) {
-        return explode(self::EXPLODE, $data);
-    }
-
-    /**
-     * 添加管理員
-     */
-    public static function addAdmin($tg_id) {
-        if ( !self::getBotAdminById($tg_id) ) {
-            $data = array(
-                'tg_id' => $tg_id
-            );
-            DB::insert('bot_admin', $data);
-        }
-    }
-    
-    /**
-     * 查詢管理員是否存在
-     */
-    public static function getBotAdminById($tg_id) {
-        $sql = "select id from bot_admin where tg_id=?s";
-        return DB::getVar($sql, [$tg_id]);
-    }
-
-    /**
-     * 傳送訊息
-     */
-    public static function sendMessage($msg) {
-        $url_sendMessage   = $GLOBALS['bot']['url'] . 'sendMessage';
-
-        $group_list = self::listGroupId();
-
-        $send['text'] = $msg;
-        foreach ($group_list as $group) {
-            $send['chat_id'] = $group['tg_group_id'];
-            self::__curlJson($url_sendMessage, $send);
-        }
-    }
-    
-    /**
-     * 查詢發送訊息的群組
-     */
-    public static function listGroupId() {
-        $sql = "select tg_group_id from bot_group";
-        return DB::runSql($sql);
-    }
-
     /**
      * 模拟post进行url请求
      */
-    private static function __curlJson($url, $param = [], $timeout = 20) {
+    private static function __curlJson($url, $param = [], $timeout = 30) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json') );
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($param) );
-        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); //设置cURL允许执行的最长秒数
-        //https请求 不验证证书和host
+        // 设置允许执行的最长秒数
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        // https请求 不验证 证书 & host
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         $data = curl_exec($ch);
