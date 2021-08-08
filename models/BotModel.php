@@ -17,6 +17,17 @@ class BotModel {
     const LOG_PATH_INFO  = ROOT . 'logs/bot/info_log.txt';
     const LOG_PATH_ERROR = ROOT . 'logs/bot/error_log.txt';
 
+    /** 錯誤代碼 */
+    const ERROR_DB_INSERT = '入群失敗';
+    const ERROR_DB_DELETE = '退群失敗';
+
+    /**
+     * 驗證 token
+     */
+    public static function verifyToken() {
+        return strtoupper( md5( strtoupper( md5( $GLOBALS['bot']['token'] ) ) ) );
+    }
+
     /**
      * 查詢管理員是否存在
      */
@@ -37,7 +48,12 @@ class BotModel {
      * 判斷命令
      */
     public static function getCommand($data) {
-        return explode(self::EXPLODE, $data);
+        $command = explode(self::EXPLODE, $data);
+        if ( !isset($command['1']) ) {
+            $command['0'] = 1;
+        }
+        
+        return $command;
     }
 
     /**
@@ -65,7 +81,7 @@ class BotModel {
      */
     public static function chatMember($data) {
         // 入群
-        if ( isset($data['message']['new_chat_member']) && $data['message']['new_chat_member']['is_bot'] ) {
+        if ( isset($data['message']['new_chat_members']) && $data['message']['new_chat_member']['is_bot'] ) {
             // 驗證機器人 ID
             if ( self::BOT_ID !== $data['message']['new_chat_member']['id'] ) {
                 return false;
@@ -73,10 +89,15 @@ class BotModel {
             
             // 查詢群組是否存在 不存在則新增
             if ( !self::getBotGroupByGroupId($data['message']['chat']['id']) ) {
-                $data = array(
-                    'tg_group_id' => $data['message']['chat']['id']
+                $ret = array(
+                    'tg_group_id'   => $data['message']['chat']['id'],
+                    'tg_group_name' => $data['message']['chat']['title']
                 );
-                DB::insert('bot_group', $data);
+                
+                // 操作失敗返回消息
+                if ( !DB::insert('bot_group', $ret) ) {
+                    self::__errorMessage(self::ERROR_DB_INSERT, $data['message']['from']['id']);
+                }
             }
         }
 
@@ -90,13 +111,17 @@ class BotModel {
             // 查詢群組是否存在 存在則刪除
             if ( $tg_group_id = self::getBotGroupByGroupId($data['message']['chat']['id']) ) {
                 $sql = "delete from bot_group where id=?i";
-                DB::runSql($sql, [$tg_group_id]);
+
+                // 操作失敗返回消息
+                if ( !DB::runSql($sql, [$tg_group_id]) ) {
+                    self::__errorMessage(self::ERROR_DB_DELETE, $data['message']['from']['id']);
+                }
             }
         }
     }
 
     /**
-     * 群发圖文
+     * 機器人群发圖文
      */
     public static function sendMessage($msg, $photo_id) {
         if ( $photo_id === false ) {
@@ -117,13 +142,11 @@ class BotModel {
         $error_log   = '';
         foreach ($group_list as $group) {
             $send['chat_id'] = $group['tg_group_id'];
+            
             $return_data     = self::__curlJson($url, $send);
             $decode_data     = json_decode($return_data['data'], true);
-
             if( !$decode_data['ok'] ) {
-                $decode_data['date'] = date('Y-m-d H:i:s');
-                $error_log           = json_encode($decode_data, true) . PHP_EOL . PHP_EOL;
-                file_put_contents(self::LOG_PATH_ERROR, $error_log, FILE_APPEND);
+                self::__errorLog($decode_data);
             }
 
             if ( $count % 10 === 0 ) {
@@ -132,6 +155,56 @@ class BotModel {
         }
     }
     
+    /**
+     * 機器人私聊
+     */
+    public static function sendNormalMessage($msg, $chat_id) {
+        $url             = $GLOBALS['bot']['url'] . 'sendMessage';
+        $send['text']    = $msg;
+        $send['chat_id'] = $chat_id;
+
+        $return_data     = self::__curlJson($url, $send);
+        $decode_data     = json_decode($return_data['data'], true);
+        if( !$decode_data['ok'] ) {
+            self::__errorLog($decode_data);
+        }
+    }
+
+    /**
+     * 機器人回复消息
+     */
+    public static function replyMessage($msg, $chat_id, $message_id) {
+        $url             = $GLOBALS['bot']['url'] . 'sendMessage';
+        $send['text']    = $msg;
+        $send['chat_id'] = $chat_id;
+        $send['reply_to_message_id'] = $message_id;
+
+        $return_data     = self::__curlJson($url, $send);
+        $decode_data     = json_decode($return_data['data'], true);
+        if( !$decode_data['ok'] ) {
+            self::__errorLog($decode_data);
+        }
+    }
+
+    /**
+     * 操作失敗 機器人返回錯誤消息
+     */
+    private static function __errorMessage($error_code, $admin_id) {
+        $url             = $GLOBALS['bot']['url'] . 'sendMessage';
+        $send['text']    = $error_code;
+        $send['chat_id'] = $admin_id;
+
+        $return_data     = self::__curlJson($url, $send);
+        $decode_data     = json_decode($return_data['data'], true);
+        self::__errorLog($decode_data);
+    }
+
+    private static function __errorLog($data) {
+        $data['date'] = date('Y-m-d H:i:s');
+        $error_log    = json_encode($data, true) . PHP_EOL . PHP_EOL;
+        file_put_contents(self::LOG_PATH_ERROR, $error_log, FILE_APPEND);
+    }
+
     /**
      * 模拟post进行url请求
      */
