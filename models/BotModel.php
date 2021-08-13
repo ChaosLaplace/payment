@@ -8,11 +8,14 @@
 class BotModel {
 
     /** 驗證機器人 ID */
-    const BOT_ID    = 1632116104;
+    const BOT_ID      = 1632116104;
     /** 驗證機器人接收訊息的群組 */
-    const BOT_GROUP = -595842164;
+    const BOT_GROUP   = -1001567249162;
+    /** 機器人綁定網址 */
+    const BOT_WEBHOOK = 'https://www.boqingbot.online';
+
     /** 分割字串 */
-    const EXPLODE   = '||';
+    const EXPLODE   = ' ';
 
     const LOG_PATH_INFO  = ROOT . 'logs/bot/info_log.txt';
     const LOG_PATH_ERROR = ROOT . 'logs/bot/error_log.txt';
@@ -48,24 +51,66 @@ class BotModel {
      * 判斷命令
      */
     public static function getCommand($data) {
-        $command = explode(self::EXPLODE, $data);
-        if ( !isset($command['1']) ) {
-            $command['0'] = 1;
+        $arr = explode(self::EXPLODE, $data);
+        if ( isset($arr['1']) ) {
+            $command['0'] = $arr['0'];
+            unset($arr['0']);
+            $command['1'] = implode(self::EXPLODE, $arr);
         }
-        
+        else {
+            $command = $arr;
+        }
+
         return $command;
+    }
+
+    /**
+     * 顯示按鈕
+     */
+    public static function showButton($msg, $chat_id) {
+        $url                  = $GLOBALS['bot']['url'] . 'sendMessage';
+        $send['text']         = '按鈕';
+        $send['chat_id']      = $chat_id;
+        $send['reply_markup'] = array(
+            'inline_keyboard' => array(
+                [
+                    array(
+                        'text' =>  '查詢當前 IP', 'url' => 'https://whatismyipaddress.com'
+                    ),
+                    array(
+                        'text' =>  'TG 機器人 API 手冊', 'url' => 'https://core.telegram.org/bots/api#formatting-options'
+                    ),
+                ],
+                [
+                    array(
+                        'text' => '鯊了你', 'callback_data' => 'kill'
+                    ),
+                ],
+            )
+        );
+
+        self::__curlJson($url, $send);
     }
 
     /**
      * 添加管理員
      */
-    public static function addAdmin($bot_admin, $tg_id) {
+    public static function addAdmin($bot_admin, $tg_id, $tg_name) {
         if ( !$bot_admin ) {
             $data = array(
-                'tg_id' => $tg_id
+                'tg_id'   => $tg_id,
+                'tg_name' => '@'.$tg_name
             );
             DB::insert('bot_admin', $data);
         }
+    }
+    
+    /*
+    * 删除管理员
+    */
+    public static function deleteAdmin($tg_name) {
+        $sql = "delete from bot_admin where tg_name=?s";
+        return DB::runSql($sql, [$tg_name]);
     }
 
     /**
@@ -118,6 +163,23 @@ class BotModel {
                 }
             }
         }
+        // 解散群
+        if ( isset($data['my_chat_member']['new_chat_member']) && $data['my_chat_member']['new_chat_member']['user']['is_bot'] ) {
+            // 驗證機器人 ID
+            if ( self::BOT_ID !== $data['my_chat_member']['new_chat_member']['user']['id'] ) {
+                return false;
+            }
+            
+            // 查詢群組是否存在 存在則刪除
+            if ( $tg_group_id = self::getBotGroupByGroupId($data['my_chat_member']['chat']['id']) ) {
+                $sql = "delete from bot_group where id=?i";
+
+                // 操作失敗返回消息
+                if ( !DB::runSql($sql, [$tg_group_id]) ) {
+                    self::__errorMessage(self::ERROR_DB_DELETE, $data['my_chat_member']['from']['id']);
+                }
+            }
+        }
     }
 
     /**
@@ -147,6 +209,8 @@ class BotModel {
             $decode_data     = json_decode($return_data['data'], true);
             if( !$decode_data['ok'] ) {
                 self::__errorLog($decode_data);
+                self::restartBot();
+                exit;
             }
 
             if ( $count % 10 === 0 ) {
@@ -184,6 +248,25 @@ class BotModel {
         if( !$decode_data['ok'] ) {
             self::__errorLog($decode_data);
         }
+    }
+
+    /**
+     * 停止机器人运行
+     */
+    public static function stopBot() {
+        $url = $GLOBALS['bot']['url'] . 'deleteWebhook';
+        self::__curlJson($url);
+    }
+
+    /**
+     * 恢复机器人运行
+     */
+    public static function restartBot() {
+        $url = $GLOBALS['bot']['url'] . 'setWebhook';
+        $url .= '?url=' . self::BOT_WEBHOOK . '/bot?token=' . $GLOBALS['bot']['md5_token'] . '&max_connections=1000&drop_pending_updates=true';
+        
+        $return_data = self::__curlJson($url);
+        return json_decode($return_data['data'], true);
     }
 
     /**

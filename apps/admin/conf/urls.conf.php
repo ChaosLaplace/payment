@@ -4,7 +4,8 @@ $urls = array(
     'test'                       => array('c'=>'Test', 'f'=>'test'),
     
     'bot'                        => array('c'=>'Bot'),
-
+    'bot/restart'                => array('c'=>'Bot', 'f'=>'restart'),
+    
     'user'                       => array('c'=>'User'),
     'user/login'                 => array('c'=>'User', 'f'=>'login'),
     'user/register'              => array('c'=>'User', 'f'=>'register'),

@@ -20,8 +20,9 @@ $GLOBALS['app']['version'] = '0.1';
 $GLOBALS['app']['env'] = 'development';
 
 // 资源域名
-$GLOBALS['bot']['token'] = '1632116104:AAGJ6ctNYHBrYjp2YzKNYYpan4Tm3fg-fHs';
-$GLOBALS['bot']['url']   = 'http://8.210.136.49:8081/bot' . $GLOBALS['bot']['token'] . '/';
+$GLOBALS['bot']['token']     = '1632116104:AAGJ6ctNYHBrYjp2YzKNYYpan4Tm3fg-fHs';
+$GLOBALS['bot']['md5_token'] = '6BB00FF0E662CF83C92BF9CD20F63EDD';
+$GLOBALS['bot']['url']       = 'http://8.210.136.49:8081/bot' . $GLOBALS['bot']['token'] . '/';
 
 // 资源域名
 $GLOBALS['app']['rs_domain']    = 'http://rs.payment.com/';
