@@ -7,48 +7,50 @@ class TestControl extends Control {
     }
 
     public function test() {
-        
-        // $myValues = $this->getValuesByArray(); // 一旦我们调用函数将会在这里创建数组
-        $myValues = $this->getValuesByYield(); // 一旦我们调用函数将会在这里创建数组
-        foreach ($myValues as $value) {
-            // echo $value;
-        }
+        $url = 'http://payboqing.made9992.com:83/order/getUrl';
+
+        $data = array(
+            'mch_id'     => '34829056',
+            'order_sn'   => '20210816151047559948sve',
+            'notify_url' => 'https://www.boqingpay.top/Pay_YsAlism_notifyurl.html',
+            'money'      => '2001',
+            'format'     => 'json',
+            'ptype'      => '1',
+            'client_ip'  => '86.97.87.225',
+            'goods_desc' => '充值',
+            'time'       => '1629097847'
+        );
+        $data['sign'] = $this->getSign($data);
+        $data = json_encode($data, true);
+
+        $tj = array(
+            'json' => $data
+        );
+        // 设置选项，包括URL
+        $url .= '?' . http_build_query($tj);
 
         // $ga = new PHPGangsta_GoogleAuthenticator();
         // // 下面为生成二维码，内容是一个URI地址（otpauth://totp/账号?secret=密钥&issuer=标题）
         // $qrcode_url = $ga->getQRCodeGoogleUrl('1', 'test', $GLOBALS['app']['secret']);
 
-        // $this->resp($qrcode_url);
-    }
-    
-    public function getValuesByArray() {
-        // 获取初始内存使用量
-        echo round(memory_get_usage() / 1024 / 1024, 2) . ' MB' . PHP_EOL;
-
-        $valuesArray = [];
-        for ($i = 1; $i < 800000; ++$i) {
-            $valuesArray[] = $i;
-            // 为了让我们能进行分析，所以我们测量一下内存使用量
-            if ( ($i % 200000) == 0 ) {
-                // 来 MB 为单位获取内存使用量
-                echo round(memory_get_usage() / 1024 / 1024, 2) . ' MB'. PHP_EOL;
-            }
-        }
-
-        return $valuesArray;
+        $this->resp($url);
     }
 
-    public function getValuesByYield() {
-        // 获取内存使用数据
-        echo round(memory_get_usage() / 1024 / 1024, 2) . ' MB' . PHP_EOL;
+    /**
+     * 签名
+     */
+    public function getSign($data) {
+        ksort($data);
 
-        for ($i = 1; $i < 800000; ++$i) {
-            yield $i;
-            // 做性能分析，因此可测量内存使用率
-            if ( ($i % 200000) == 0 ) {
-                // 内存使用以 MB 为单位
-                echo round(memory_get_usage() / 1024 / 1024, 2) . ' MB'. PHP_EOL;
+        $md5str = '';
+        foreach ($data as $k => $v) {
+            if ($k == 'sign' || $v === '') {
+                continue;
             }
+            $md5str .= $k . '=' . $v . '&';
         }
+
+        // return strtoupper( md5($md5str . 'key=' . self::MERCHANT_MD5_KEY) );
+        return md5($md5str . 'key=979ad2ce99e34e46b928839318875f6b');
     }
 }

@@ -6,6 +6,13 @@ $urls = array(
     'bot'                        => array('c'=>'Bot'),
     'bot/restart'                => array('c'=>'Bot', 'f'=>'restart'),
     
+    'account'                    => array('c'=>'Account'),
+    'account/upload'             => array('c'=>'Account', 'f'=>'upload'),
+    'account/verify'             => array('c'=>'Account', 'f'=>'verify'),
+    'account/limit'              => array('c'=>'Account', 'f'=>'limit'),
+
+    'jd'                         => array('c'=>'JDPhone'),
+
     'user'                       => array('c'=>'User'),
     'user/login'                 => array('c'=>'User', 'f'=>'login'),
     'user/register'              => array('c'=>'User', 'f'=>'register'),
@@ -21,3 +28,6 @@ return $urls;
 //     $new_urls[$k] = $v;
 // }
 // return $new_urls;
+
+// linpingzhi136
+// linpingping136

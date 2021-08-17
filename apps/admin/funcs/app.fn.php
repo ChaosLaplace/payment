@@ -1,6 +1,6 @@
 <?php if(!defined("XXOO")) exit("No direct script access allowed");
 
-// require_once ROOT . 'funcs/qrcode.php';
+// require_once ROOT . 'funcs/qrcode.fn.php';
 // require_once ROOT . 'libs/tcpdf/tcpdf.php';
 
 /**

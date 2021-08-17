@@ -82,8 +82,8 @@ $GLOBALS['redis']['event']['db']   = '1';
 // 默认数据库配置
 $GLOBALS['db']['default']['driver']     = 'mysql';
 $GLOBALS['db']['default']['hostname']   = 'localhost';
-$GLOBALS['db']['default']['username']   = 'zxbot';
-$GLOBALS['db']['default']['password']   = 'Z58ks8X43dyZDRtY';
-$GLOBALS['db']['default']['database']   = 'zxbot';
+$GLOBALS['db']['default']['username']   = 'root';
+$GLOBALS['db']['default']['password']   = 'root';
+$GLOBALS['db']['default']['database']   = 'pay.';
 $GLOBALS['db']['default']['port']       = '3306';
 $GLOBALS['db']['default']['charset']    = 'utf8bm4';

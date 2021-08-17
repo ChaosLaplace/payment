@@ -69,11 +69,14 @@ class Control {
         return $temp;
     }
 
+    /**
+     * 跨域使用
+     */
     private static function __addHeader() {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, OPTIONS,PATCH');
         header('Access-Control-Allow-Headers: DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,token,access_token,version,device_type,Origin,lang,at');
-        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        if ( $_SERVER['REQUEST_METHOD'] == 'OPTIONS' ) {
             // 浏览器页面ajax跨域请求会请求2次，第一次会发送OPTIONS预请求,不进行处理，直接exit返回，但因为下次发送真正的请求头部有带token，所以这里设置允许下次请求头带token否者下次请求无法成功
             header('Access-Control-Allow-Headers:x-requested-with,content-type,token,access_token,version,device_type,Origin,lang,at');
             exit('ok');
