@@ -46,6 +46,9 @@ header("Content-Type:text/html;charset={$GLOBALS['app']['charset']}");
 // 载入框架核心函数
 require(XXOO.'funcs/xxoo.fn.php');
 
+// 設置異常處理器
+// set_exception_handler('show_exception');
+
 // 设置错误处理器，自定义错误处理
 set_error_handler('show_error');
 

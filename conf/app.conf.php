@@ -74,7 +74,7 @@ $GLOBALS['redis']['default']['db']   = '0';
 
 // 过期事件订阅库 redis config
 // 因为此库的过期事件都会触发回调，为了方便管理和性能，所以使用一个独立的库
-$GLOBALS['redis']['event']['host'] = 'localhost';
+$GLOBALS['redis']['event']['host'] = '127.0.0.1';
 $GLOBALS['redis']['event']['port'] = '6379';
 $GLOBALS['redis']['event']['auth'] = '';
 $GLOBALS['redis']['event']['db']   = '1';

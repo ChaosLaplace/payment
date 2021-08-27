@@ -9,6 +9,14 @@
 */
 
 /**
+ * 異常處理函數
+ */
+function show_exception($exception) {
+    echo '<b>Exception:</b>' , $exception->getMessage();
+    exit;
+}
+
+/**
  * 错误处理函数，用自定义错误处理函数，接管PHP错误处理
  * @param int $error_num
  * @param string $message
